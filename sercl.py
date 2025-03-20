@@ -13,7 +13,7 @@ local_ip = socket.gethostbyname(socket.gethostname())
 server = Server()
 
 # Configurar el servidor
-server.set_endpoint(f"opc.tcp://192.168.0.86:4841")
+server.set_endpoint(f"opc.tcp://{local_ip}:4841")
 server.set_server_name("Servidor OPC UA - Datos Dinámicos")
 
 # Registrar un espacio de nombres para las variables
@@ -34,14 +34,11 @@ variables = [
     receta_obj.add_variable(idx, "idRecetaProxima", 1),  
 ]
 
-# Crear objetos para los Grippers, Robot, Torre, etc.
-#datosGripper = server.nodes.objects.add_object(idx, "datosGripper")
 variables += [
     receta_obj.add_variable(idx, "NGripperActual", 2),
     receta_obj.add_variable(idx, "NGripperProximo", 3),
 ]
 
-#datosRobot = server.nodes.objects.add_object(idx, "datosRobot")
 variables += [
     receta_obj.add_variable(idx, "posicionX", 20),
     receta_obj.add_variable(idx, "posicionY", 40),
@@ -78,43 +75,7 @@ variables+= [
     receta_obj.add_variable(idx, "desmoldeobanda",1)
 ]
 
-"""
-#ALARMA
-alarma = server.nodes.objects.add_object(idx, "Server interface_2")
-variable = alarma.add_variable(idx, "alarma", [
-    False, False, False, False, False, False, False, False, False, False,
-    False, False, False, False, False, False, False, False, False, False,
-    False, False, False, False, False, False, False, False, False, False,
-    False, False, False, False, False, False, False, False, False, False,
-    False, False, False, False, False, False, False, False, False, False
-])
 
-#ALARMA CONFIG HILO
-variable.set_writable()
-array = variable.get_value()
-
-def update_group(start, end, update_interval, hold_time):
-    while True:
-        for i in range(start, end):
-            # Activar el elemento
-            array[i] = True
-            variable.set_value(array)
-            time.sleep(hold_time)
-
-            # Desactivar el elemento
-            array[i] = False
-            variable.set_value(array)
-        
-            sleep_time = update_interval - hold_time
-            if sleep_time < 0:
-                sleep_time = 0 
-            
-            time.sleep(sleep_time)
-thread1 = threading.Thread(target=update_group, args=(0, 15, 15, 3)) 
-thread2 = threading.Thread(target=update_group, args=(15, 35, 5, 10)) 
-thread3 = threading.Thread(target=update_group, args=(35, len(array), 5, 2))  
-
-"""
 
 def crear_variables_nulas(count=11):
     return []  # Lista vacía, pero con la intención de no superar `count`
@@ -124,7 +85,7 @@ alarma = server_interface_2.add_object(idx, "Alarma")
 config_obj = server_interface_2.add_object(idx, "Configuraciones")
 
 receta_obj = server_interface_2.add_object(idx, "Receta")  # Se crea solo una vez
-variables = [
+variablesReceta = [
     receta_obj.add_variable(idx, "NOMBRE", "RECETA MODIFICADA AA"),
     receta_obj.add_variable(idx, "NUMERO_DE_GRIPPER", 2),
     receta_obj.add_variable(idx, "TIPO_DE_MOLDE", "Tipo C"),
@@ -162,7 +123,7 @@ thread.start()
 
 
 nivelesHN = server_interface_2.add_object(idx, "DatosNivelesHN")  # Se crea solo una vez
-variables = [
+variablesHN = [
     nivelesHN.add_variable(idx, "Correcion_hN1", "1"),
     nivelesHN.add_variable(idx, "Correcion_hN2", "2"),
     nivelesHN.add_variable(idx, "Correcion_hN3", "3"),
@@ -177,7 +138,7 @@ variables = [
 ]
 
 nivelesuHN = server_interface_2.add_object(idx, "DatosNivelesuHN")  # Se crea solo una vez
-variables = [
+variablesUHN = [
     nivelesuHN.add_variable(idx, "ultimo_hNivel1", "1"),
     nivelesuHN.add_variable(idx, "ultimo_hNivel2", "2"),
     nivelesuHN.add_variable(idx, "ultimo_hNivel3", "3"),
@@ -192,7 +153,7 @@ variables = [
 ]
 
 nivelesChG = server_interface_2.add_object(idx, "DatosNivelesChG")  # Se crea solo una vez
-variables = [
+variablesHG = [
     nivelesChG.add_variable(idx, "Correcion_hguardado_N1", "1"),
     nivelesChG.add_variable(idx, "Correcion_hguardado_N2", "2"),
     nivelesChG.add_variable(idx, "Correcion_hguardado_N3", "3"),
@@ -207,7 +168,7 @@ variables = [
 ]
 
 nivelesChB = server_interface_2.add_object(idx, "DatosNivelesChB")  # Se crea solo una vez
-variables = [
+variablesCH8 = [
     nivelesChB.add_variable(idx, "Correcion_hbusqueda_N1", "1"),
     nivelesChB.add_variable(idx, "Correcion_hbusqueda_N2", "2"),
     nivelesChB.add_variable(idx, "Correcion_hbusqueda_N3", "3"),
@@ -222,7 +183,7 @@ variables = [
 ]
 
 nivelesFA = server_interface_2.add_object(idx, "DatosNivelesFA")  # Se crea solo una vez
-variables = [
+variablesFA = [
     nivelesFA.add_variable(idx, "FallasN1", "1"),
     nivelesFA.add_variable(idx, "FallasN2", "2"),
     nivelesFA.add_variable(idx, "FallasN3", "3"),
@@ -237,7 +198,7 @@ variables = [
 ]
 
 DatosTorre = server_interface_2.add_object(idx, "DatosTorre")  # Se crea solo una vez
-variables = [
+variablesTRR = [
     DatosTorre.add_variable(idx, "TAG", "Cuadrado"),
     DatosTorre.add_variable(idx, "Coreccion_hBastidor", 1),
     DatosTorre.add_variable(idx, "Coreccion_hAjuste", 2),
@@ -293,12 +254,12 @@ def update_group(start, end, update_interval, hold_time):
         for i in range(start, end):
             # Activar el elemento
             alarm_nodes[i].set_value(True)
-            print(f"Elemento {i} activado en grupo {start}-{end}")
+            #print(f"Elemento {i} activado en grupo {start}-{end}")
             time.sleep(hold_time)
 
             # Desactivar el elemento
             alarm_nodes[i].set_value(False)
-            print(f"Elemento {i} desactivado en grupo {start}-{end}")
+            #print(f"Elemento {i} desactivado en grupo {start}-{end}")
 
             sleep_time = update_interval - hold_time
             if sleep_time < 0:
@@ -351,7 +312,7 @@ def ciclo_de_desmoldeo():
             ciclo_inicio = True
             # Actualizar los valores de los nodos durante el ciclo
             for var in variables:
-                if var.get_browse_name().Name == "NombreActual":
+                if var.get_browse_name().Name == "Nombre actual":
                     var.set_value(receta_nombre)
                 elif var.get_browse_name().Name == "RecetaProximaDesmolde":
                     var.set_value((idReceta_actual % 7) + 1)
